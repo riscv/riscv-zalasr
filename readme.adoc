@@ -1,8 +1,7 @@
-= RISC-V docs-spec-template
+= RISC-V Zalasr Specification
 
-This repository serves as a template for creating GitHub repositories within the RISC-V organization that are intended for developing specifications.
-
-**If you are reading this in a specification repository, please update the title for this section and provide a relevant introduction to your repository.**
+This repository serves to hold the specification for the RISC-V Zalasr (Atomic, Load-Acquire Store-Release) extension.
+This covers the load-acquire and store-release instructions.
 
 == License
 
