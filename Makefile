@@ -13,7 +13,7 @@
 # the Doc Template for RISC-V Extensions.
 
 HEADER_SOURCE := header.adoc
-PDF_RESULT := spec-sample.pdf
+PDF_RESULT := riscv-zalasr-0p1.pdf
 
 ASCIIDOCTOR_PDF := asciidoctor-pdf
 OPTIONS := --trace -a compress \

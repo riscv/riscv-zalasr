@@ -1,47 +1,119 @@
 [[chapter2]]
-== The Second Chapter
+== Instructions
 
-. The first item.
+<<<
+[#insns-ldatomic,reftext="Load Atomic Ordered"]
+=== Load atomic ordered
 
-. The second item.
-+
-.. The first sub item.
+Synopsis::
+Loads size bytes of memory from rs1 atomically and subject to the ordering requirements.
 
-.. The second sub item.
-+
-[CAUTION]
+Mnemonic::
+lb.{aq,aqrl} _rd_, (_rs1_)
+lh.{aq,aqrl} _rd_, (_rs1_)
+lw.{aq,aqrl} _rd_, (_rs1_)
+ld.{aq,aqrl} _rd_, (_rs1_)
+lq.{aq,aqrl} _rd_, (_rs1_)
+
+Encoding::
+[wavedrom, ,svg]
+....
+{reg: [
+  {bits: 7,  name: 'opcode',    attr: ['7', 'AMO'], type: 8},
+  {bits: 5,  name: 'rd',        attr: ['5', 'dest'], type: 2},
+  {bits: 3,  name: 'funct3',    attr: ['3', 'width'], type: 8},
+  {bits: 5,  name: 'rs1',       attr: ['5', 'addr'], type: 4},
+  {bits: 5,  name: 'rs2',       attr: ['5', '0'], type: 4},
+  {bits: 1,  name: 'rl',        attr: ['1', 'ring'], type: 8},
+  {bits: 1,  name: 'aq',        attr: ['1', 'orde'], type: 8},
+  {bits: 5,  name: 'funct5',    attr: ['5', 'Load Ordered'], type: 8},
+]}
+....
+
+Description::
+
+This instruction loads size bytes of memory from rs1 atomically.
+If the size is less than XLEN, it is sign-extended to fill the destination register.
+This load may have ordering annotations _aq_ and _rl_ encoded in the instruction.
+If the implementation is not able to complete this load atomically it should generate an address-misaligned or access-fault exception.
+The version with only the _rl_ bit set is RESERVED.
+RV32 should not implement the d and q variant and RV64 should not implement the q variant.
+
+funct5 for this instruction is 00110.
+
+[NOTE]
 ====
-A moment of caution is required for this block of text must be read and apreciated for its importance.
+Load-reserved is not seen as useful at this time, due to its lack of support in language-level memory models.
+For maximum compatibility, it is recommended that implementations either support the variant with only _rl_ set or treat it as equivalent to both _aq_ and _rl_ being set.
+====
+[NOTE]
+====
+Disassemblers should disassemble the variant with neither _aq_ nor _rl_ set to the plain load instruction. 
 ====
 
-. Yet another item.
+SAIL code::
+[source,sail]
+--
+TODO. steal code from https://github.com/riscv/sail-riscv/blob/master/model/riscv_insts_aext.sail
+--
 
-. Again, an item.
+// load-ordered funct5 = 00110
 
-.. A multi-line item.
-+
-This item has multiple lines.
-+
-By multiple lines, this is what we mean.
-+
-Seriously, multiple.
+<<<
+[#insns-sdatomic,reftext="Store Atomic Ordered"]
+=== Load atomic ordered
 
-=== An example table
+Synopsis::
+Store size bytes of memory from rs2 to rs1 atomically and subject to the ordering requirements.
 
-[cols="^1,^1,^1,^1,^3,^3",stripes=even,options="header"]
-|===
-4+|Letters _and_ bits {set:cellbgcolor:green} 2+|A much longer area
-|L|R|W|X|Quarter 1|Quarter 2
-|{set:cellbgcolor:!} 0|0|0|0 2+|Rows alternate colors
-|0|0|0|1|Thing 1|Thing 2
-|1|0|0|0|Thing 3|Thing 4
-|1|1|1|1 2+|Span Thing 1 and 2
-|===
+Mnemonic::
+sb.{rl,aqrl} _rd_, _rs2, (_rs1_)
+sh.{rl,aqrl} _rd_, _rs2, (_rs1_)
+sw.{rl,aqrl} _rd_, _rs2, (_rs1_)
+sd.{rl,aqrl} _rd_, _rs2, (_rs1_)
+sq.{rl,aqrl} _rd_, _rs2, (_rs1_)
 
-=== Sub section
+Encoding::
+[wavedrom, ,svg]
+....
+{reg: [
+  {bits: 7,  name: 'opcode',    attr: ['7', 'AMO'], type: 8},
+  {bits: 5,  name: 'rd',        attr: ['5', 'dest'], type: 2},
+  {bits: 3,  name: 'funct3',    attr: ['3', 'width'], type: 8},
+  {bits: 5,  name: 'rs1',       attr: ['5', 'addr'], type: 4},
+  {bits: 5,  name: 'rs2',       attr: ['5', 'src'], type: 4},
+  {bits: 1,  name: 'rl',        attr: ['1', 'ring'], type: 8},
+  {bits: 1,  name: 'aq',        attr: ['1', 'orde'], type: 8},
+  {bits: 5,  name: 'funct5',    attr: ['5', 'Store Ordered'], type: 8},
+]}
+....
 
-Diam donec adipiscing tristique risus indexterm:[risus]. Nisl rhoncus mattis rhoncus urna. Egestas egestas fringilla phasellus faucibus scelerisque eleifend donec pretium vulputate. Porta non pulvinar neque laoreet suspendisse interdum consectetur libero id. Massa vitae tortor condimentum lacinia quis vel. Donec ac odio tempor orci. Mi sit amet mauris commodo quis imperdiet massa tincidunt. Quis enim lobortis scelerisque fermentum dui. Lacus viverra vitae congue eu. Sed faucibus turpis in eu mi bibendum neque. Sit amet porttitor eget dolor. Aliquet eget sit amet tellus cras adipiscing enim. Id cursus metus aliquam eleifend mi. Vestibulum lorem sed risus ultricies tristique nulla aliquet.
+Description::
 
-=== Yet another subsection
+This instruction stores size bytes of memory from rs1 atomically.
+This load may have ordering annotations _aq_ and _rl_ encoded in the instruction.
+If the implementation is not able to complete this store atomically it should generate an address-misaligned or access-fault exception.
+The version with only the _aq_ bit set is RESERVED.
+RV32 should not implement the d and q variant and RV64 should not implement the q variant.
 
-Quam lacus suspendisse faucibus interdum posuere lorem ipsum. Nulla aliquet enim tortor at auctor urna nunc id cursus. Massa massa ultricies mi quis hendrerit dolor magna. Integer enim neque volutpat ac tincidunt. Dolor magna eget est lorem ipsum dolor. Urna neque viverra justo nec. Neque gravida in fermentum et. Fringilla ut morbi tincidunt augue interdum velit euismod. Dolor sit amet consectetur adipiscing elit. Eu facilisis sed odio morbi. In cursus turpis massa tincidunt dui. Orci indexterm:[orci] phasellus egestas tellus rutrum tellus. Semper eget duis at tellus at urna condimentum. Orci porta non pulvinar neque laoreet suspendisse interdum consectetur.
+funct5 for this instruction is 00111.
+
+
+[NOTE]
+====
+Store-acquire is not seen as useful at this time, due to its lack of support in language-level memory models.
+For maximum compatibility, it is recommended that implementations either support the variant with only _aq_ set or treat it as equivalent to both _aq_ and _rl_ being set.
+====
+[NOTE]
+====
+Disassemblers should disassemble the variant with neither _aq_ nor _rl_ set to the plain store instruction. 
+====
+
+SAIL code::
+[source,sail]
+--
+TODO. steal code from https://github.com/riscv/sail-riscv/blob/master/model/riscv_insts_aext.sail
+--
+
+
+// store-ordered funct5 = 00111

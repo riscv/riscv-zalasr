@@ -1,11 +1,11 @@
-= RISC-V Example Specification Document (Zexmpl)
+= RISC-V Atomic Load-Acquire and Store-Release Extension (Zalasr)
 Author 1; Author 2; RISC-V Task Group
 
 [[header]]
-:description: RISC-V Example Specification Document (Zexmpl)
+:description: RISC-V Atomic Load-Acquire and Store-Release Extension (Zalasr)
 :company: RISC-V.org
-:revdate: 1/2023
-:revnumber: 1.0
+:revdate: 2023-05
+:revnumber: 0.1
 :revremark: This document is in development. Assume everything can change. See http://riscv.org/spec-state for details.
 :url-riscv: http://riscv.org
 :doctype: book
