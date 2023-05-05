@@ -3,17 +3,21 @@
 
 <<<
 [#insns-ldatomic,reftext="Load Atomic Ordered"]
-=== Load atomic ordered
+=== Load Atomic Ordered
 
 Synopsis::
-Loads size bytes of memory from rs1 atomically and subject to the ordering requirements.
+Loads size bytes of memory from the address in _rs1_ atomically and subject to the ordering requirements.
 
 Mnemonic::
-lb.{aq,aqrl} _rd_, (_rs1_)
-lh.{aq,aqrl} _rd_, (_rs1_)
-lw.{aq,aqrl} _rd_, (_rs1_)
-ld.{aq,aqrl} _rd_, (_rs1_)
-lq.{aq,aqrl} _rd_, (_rs1_)
+lb.{aq,aq.rl} _rd_, (_rs1_)
+
+lh.{aq,aq.rl} _rd_, (_rs1_)
+
+lw.{aq,aq.rl} _rd_, (_rs1_)
+
+ld.{aq,aq.rl} _rd_, (_rs1_)
+
+lq.{aq,aq.rl} _rd_, (_rs1_)
 
 Encoding::
 [wavedrom, ,svg]
@@ -34,7 +38,7 @@ Description::
 
 This instruction loads size bytes of memory from rs1 atomically.
 If the size is less than XLEN, it is sign-extended to fill the destination register.
-This load may have ordering annotations _aq_ and _rl_ encoded in the instruction.
+This load may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 If the implementation is not able to complete this load atomically it should generate an address-misaligned or access-fault exception.
 The version with only the _rl_ bit set is RESERVED.
 RV32 should not implement the d and q variant and RV64 should not implement the q variant.
@@ -61,17 +65,21 @@ TODO. steal code from https://github.com/riscv/sail-riscv/blob/master/model/risc
 
 <<<
 [#insns-sdatomic,reftext="Store Atomic Ordered"]
-=== Load atomic ordered
+=== Store Atomic Ordered
 
 Synopsis::
-Store size bytes of memory from rs2 to rs1 atomically and subject to the ordering requirements.
+Store size bytes of memory from _rs2_ to the address in _rs1_ atomically and subject to the ordering requirements.
 
 Mnemonic::
-sb.{rl,aqrl} _rd_, _rs2, (_rs1_)
-sh.{rl,aqrl} _rd_, _rs2, (_rs1_)
-sw.{rl,aqrl} _rd_, _rs2, (_rs1_)
-sd.{rl,aqrl} _rd_, _rs2, (_rs1_)
-sq.{rl,aqrl} _rd_, _rs2, (_rs1_)
+sb.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+
+sh.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+
+sw.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+
+sd.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+
+sq.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
 
 Encoding::
 [wavedrom, ,svg]
@@ -91,7 +99,7 @@ Encoding::
 Description::
 
 This instruction stores size bytes of memory from rs1 atomically.
-This load may have ordering annotations _aq_ and _rl_ encoded in the instruction.
+This store may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 If the implementation is not able to complete this store atomically it should generate an address-misaligned or access-fault exception.
 The version with only the _aq_ bit set is RESERVED.
 RV32 should not implement the d and q variant and RV64 should not implement the q variant.
