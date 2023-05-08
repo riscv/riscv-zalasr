@@ -9,6 +9,7 @@ Synopsis::
 Loads size bytes of memory from the address in _rs1_ atomically and subject to the ordering requirements.
 
 Mnemonic::
+====
 lb.{aq,aq.rl} _rd_, (_rs1_)
 
 lh.{aq,aq.rl} _rd_, (_rs1_)
@@ -18,7 +19,7 @@ lw.{aq,aq.rl} _rd_, (_rs1_)
 ld.{aq,aq.rl} _rd_, (_rs1_)
 
 lq.{aq,aq.rl} _rd_, (_rs1_)
-
+====
 Encoding::
 [wavedrom, ,svg]
 ....
@@ -40,19 +41,20 @@ This instruction loads size bytes of memory from rs1 atomically.
 If the size is less than XLEN, it is sign-extended to fill the destination register.
 This load may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 If the implementation is not able to complete this load atomically it should generate an address-misaligned or access-fault exception.
-The version with only the _rl_ bit set is RESERVED.
+The versions without the _aq_ bit set are RESERVED.
 RV32 should not implement the d and q variant and RV64 should not implement the q variant.
 
 funct5 for this instruction is 00110.
 
 [NOTE]
 ====
-Load-reserved is not seen as useful at this time, due to its lack of support in language-level memory models.
+Load-release is not seen as useful at this time, due to its lack of support in language-level memory models.
 For maximum compatibility, it is recommended that implementations either support the variant with only _rl_ set or treat it as equivalent to both _aq_ and _rl_ being set.
 ====
 [NOTE]
 ====
-Disassemblers should disassemble the variant with neither _aq_ nor _rl_ set to the plain load instruction. 
+Load-atomic is similarly not seen as useful enough.
+Instead, users should suitably align their pointers so that ordinary load instructions suffice.
 ====
 
 SAIL code::
@@ -71,6 +73,7 @@ Synopsis::
 Store size bytes of memory from _rs2_ to the address in _rs1_ atomically and subject to the ordering requirements.
 
 Mnemonic::
+====
 sb.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
 
 sh.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
@@ -80,6 +83,7 @@ sw.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
 sd.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
 
 sq.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+====
 
 Encoding::
 [wavedrom, ,svg]
@@ -101,7 +105,7 @@ Description::
 This instruction stores size bytes of memory from rs1 atomically.
 This store may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 If the implementation is not able to complete this store atomically it should generate an address-misaligned or access-fault exception.
-The version with only the _aq_ bit set is RESERVED.
+The versions without the _rl_ bit set are RESERVED.
 RV32 should not implement the d and q variant and RV64 should not implement the q variant.
 
 funct5 for this instruction is 00111.
@@ -114,7 +118,8 @@ For maximum compatibility, it is recommended that implementations either support
 ====
 [NOTE]
 ====
-Disassemblers should disassemble the variant with neither _aq_ nor _rl_ set to the plain store instruction. 
+Store-atomic is similarly not seen as useful enough.
+Instead, users should suitably align their pointers so that ordinary store instructions suffice.
 ====
 
 SAIL code::
