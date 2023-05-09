@@ -49,10 +49,6 @@ funct5 for this instruction is 00110.
 [NOTE]
 ====
 Load-release is not seen as useful at this time, due to its lack of support in language-level memory models.
-For maximum compatibility, it is recommended that implementations either support the variant with only _rl_ set or treat it as equivalent to both _aq_ and _rl_ being set.
-====
-[NOTE]
-====
 Load-atomic is similarly not seen as useful enough.
 Instead, users should suitably align their pointers so that ordinary load instructions suffice.
 ====
@@ -114,10 +110,6 @@ funct5 for this instruction is 00111.
 [NOTE]
 ====
 Store-acquire is not seen as useful at this time, due to its lack of support in language-level memory models.
-For maximum compatibility, it is recommended that implementations either support the variant with only _aq_ set or treat it as equivalent to both _aq_ and _rl_ being set.
-====
-[NOTE]
-====
 Store-atomic is similarly not seen as useful enough.
 Instead, users should suitably align their pointers so that ordinary store instructions suffice.
 ====
