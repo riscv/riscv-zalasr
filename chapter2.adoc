@@ -40,7 +40,10 @@ Description::
 This instruction loads size bytes of memory from rs1 atomically.
 If the size is less than XLEN, it is sign-extended to fill the destination register.
 This load may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
-If the implementation is not able to complete this load atomically it should generate an address-misaligned or access-fault exception.
+The address held in _rs1_ should be naturally aligned to the size of the operand.
+If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
+The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
+If the Zam standard extension is implemented, the address is not required to be aligned and the weaker atomicity guarantee provided by Zam applies.
 The versions without the _aq_ bit set are RESERVED.
 RV32 should not implement the d and q variant and RV64 should not implement the q variant.
 
@@ -100,7 +103,10 @@ Description::
 
 This instruction stores size bytes of memory from rs1 atomically.
 This store may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
-If the implementation is not able to complete this store atomically it should generate an address-misaligned or access-fault exception.
+The address held in _rs1_ should be naturally aligned to the size of the operand.
+If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
+The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
+If the Zam standard extension is implemented, the address is not required to be aligned and the weaker atomicity guarantee provided by Zam applies.
 The versions without the _rl_ bit set are RESERVED.
 RV32 should not implement the d and q variant and RV64 should not implement the q variant.
 
