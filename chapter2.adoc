@@ -10,15 +10,15 @@ Loads size bytes of memory from the address in _rs1_ atomically and subject to t
 
 Mnemonic::
 ====
-lb.{aq,aq.rl} _rd_, (_rs1_)
+lb.{aq,aqrl} _rd_, (_rs1_)
 
-lh.{aq,aq.rl} _rd_, (_rs1_)
+lh.{aq,aqrl} _rd_, (_rs1_)
 
-lw.{aq,aq.rl} _rd_, (_rs1_)
+lw.{aq,aqrl} _rd_, (_rs1_)
 
-ld.{aq,aq.rl} _rd_, (_rs1_)
+ld.{aq,aqrl} _rd_, (_rs1_)
 
-lq.{aq,aq.rl} _rd_, (_rs1_)
+lq.{aq,aqrl} _rd_, (_rs1_)
 ====
 Encoding::
 [wavedrom, ,svg]
@@ -31,7 +31,7 @@ Encoding::
   {bits: 5,  name: 'rs2',       attr: ['5', '0'], type: 4},
   {bits: 1,  name: 'rl',        attr: ['1', 'ring'], type: 8},
   {bits: 1,  name: 'aq',        attr: ['1', 'orde'], type: 8},
-  {bits: 5,  name: 'funct5',    attr: ['5', 'Load Ordered'], type: 8},
+  {bits: 5,  name: 'funct5',    attr: ['5', 'Load Ordered', '00110'], type: 8},
 ]}
 ....
 
@@ -45,7 +45,7 @@ If the address is not naturally aligned, an address-misaligned exception or an a
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
 If the Zam standard extension is implemented, the address is not required to be aligned and the weaker atomicity guarantee provided by Zam applies.
 The versions without the _aq_ bit set are RESERVED.
-RV32 should not implement the d and q variant and RV64 should not implement the q variant.
+RV32 should not implement the d and q variants and RV64 should not implement the q variant.
 
 funct5 for this instruction is 00110.
 
@@ -59,10 +59,61 @@ Instead, users should suitably align their pointers so that ordinary load instru
 SAIL code::
 [source,sail]
 --
-TODO. steal code from https://github.com/riscv/sail-riscv/blob/master/model/riscv_insts_aext.sail
---
+union clause ast = LOADAQ : (bool, bool, regidx, size, regidx)
 
-// load-ordered funct5 = 00110
+mapping clause encdec = LOADAQ(aq, rl, rs1, size, rd) if haveZalasr()
+  <-> 0b00110 @ bool_bits(aq) @ bool_bits(rl) @ 0b00000 @ rs1 @ 0b0 @ size_bits(size) @ rd @ 0b0101111 if haveZalasr()
+
+val process_loadaq : forall 'n, 0 < 'n <= xlen_bytes. (regidx, xlenbits, MemoryOpResult(bits(8 * 'n)), bool) -> Retired
+function process_loadaq (rd, addr, value, is_unsigned) =
+  match extend_value(is_unsigned, value) {
+    MemValue(result) => { X(rd) = result; RETIRE_SUCCESS },
+    MemException(e)  => { handle_mem_exception(addr, e); RETIRE_FAIL }
+  }
+
+function clause execute(LOADRES(aq, rl, rs1, width, rd)) = {
+  if haveZalasr() then {
+    /* Get the address, X(rs1) (no offset).
+     * Extensions might perform additional checks on address validity.
+     */
+    match ext_data_get_addr(rs1, zeros(), Read(Data), width) {
+      Ext_DataAddr_Error(e)  => { ext_handle_data_check_error(e); RETIRE_FAIL },
+      Ext_DataAddr_OK(vaddr) => {
+        let aligned : bool =
+           match width {
+             BYTE   => true,
+             HALF   => vaddr[0..0] == 0b0,
+             WORD   => vaddr[1..0] == 0b00,
+             DOUBLE => vaddr[2..0] == 0b000
+           };
+        if not(aligned)
+        then { handle_mem_exception(vaddr, E_Load_Addr_Align()); RETIRE_FAIL }
+        else match translateAddr(vaddr, Read(Data)) {
+               TR_Failure(e, _)    => { handle_mem_exception(vaddr, e); RETIRE_FAIL },
+               TR_Address(addr, _) =>
+                 match (width, sizeof(xlen)) {
+                   (BYTE, _)    => process_loadaq(rd, vaddr, mem_read(Read(Data), addr, 1, aq, aq & rl, true), false),
+                   (HALF, _)    => process_loadaq(rd, vaddr, mem_read(Read(Data), addr, 2, aq, aq & rl, true), false),
+                   (WORD, _)    => process_loadaq(rd, vaddr, mem_read(Read(Data), addr, 4, aq, aq & rl, true), false),
+                   (DOUBLE, 64) => process_loadaq(rd, vaddr, mem_read(Read(Data), addr, 8, aq, aq & rl, true), false),
+                   _            => internal_error(__FILE__, __LINE__, "Unexpected Load-acquire width")
+                 }
+             }
+      }
+    }
+  } else {
+    handle_illegal();
+    RETIRE_FAIL
+  }
+}
+
+mapping clause assembly = LOADAQ(aq, rl, rs1, size, rd)
+                      <-> "l" ^ size_mnemonic(size)
+                          ^ "." ^ maybe_aq(aq) ^ maybe_rl(rl)
+                          ^ spc() ^ reg_(rd)
+                          ^ sep() ^ reg_name(rs1)
+
+--
 
 <<<
 [#insns-sdatomic,reftext="Store Atomic Ordered"]
@@ -73,15 +124,15 @@ Store size bytes of memory from _rs2_ to the address in _rs1_ atomically and sub
 
 Mnemonic::
 ====
-sb.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+sb.{rl,aqrl} _rd_, _rs2_, (_rs1_)
 
-sh.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+sh.{rl,aqrl} _rd_, _rs2_, (_rs1_)
 
-sw.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+sw.{rl,aqrl} _rd_, _rs2_, (_rs1_)
 
-sd.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+sd.{rl,aqrl} _rd_, _rs2_, (_rs1_)
 
-sq.{rl,aq.rl} _rd_, _rs2_, (_rs1_)
+sq.{rl,aqrl} _rd_, _rs2_, (_rs1_)
 ====
 
 Encoding::
@@ -95,7 +146,7 @@ Encoding::
   {bits: 5,  name: 'rs2',       attr: ['5', 'src'], type: 4},
   {bits: 1,  name: 'rl',        attr: ['1', 'ring'], type: 8},
   {bits: 1,  name: 'aq',        attr: ['1', 'orde'], type: 8},
-  {bits: 5,  name: 'funct5',    attr: ['5', 'Store Ordered'], type: 8},
+  {bits: 5,  name: 'funct5',    attr: ['5', 'Store Ordered', '00111'], type: 8},
 ]}
 ....
 
@@ -108,7 +159,7 @@ If the address is not naturally aligned, an address-misaligned exception or an a
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
 If the Zam standard extension is implemented, the address is not required to be aligned and the weaker atomicity guarantee provided by Zam applies.
 The versions without the _rl_ bit set are RESERVED.
-RV32 should not implement the d and q variant and RV64 should not implement the q variant.
+RV32 should not implement the d and q variants and RV64 should not implement the q variant.
 
 funct5 for this instruction is 00111.
 
@@ -123,7 +174,75 @@ Instead, users should suitably align their pointers so that ordinary store instr
 SAIL code::
 [source,sail]
 --
-TODO. steal code from https://github.com/riscv/sail-riscv/blob/master/model/riscv_insts_aext.sail
+union clause ast = STORERL : (bool, bool, regidx, regidx, word_width)
+mapping clause encdec = STORERL(aq, rl, rs2, rs1, size) if haveZalasr()
+  <-> 0b00111 @ bool_bits(aq) @ bool_bits(rl) @ rs2 @ rs1 @ 0b0 @ size_bits(size) @ 0b00000 @ 0b0101111 if haveZalasr()
+
+/* NOTE: Currently, we only EA if address translation is successful. This may need revisiting. */
+function clause execute (STORERL(aq, rl, rs2, rs1, width)) = {
+  if havaZalasr() then {
+    /* Get the address, X(rs1) (no offset).
+     * Extensions might perform additional checks on address validity.
+     */
+    match ext_data_get_addr(rs1, zeros(), Write(Data), width) {
+      Ext_DataAddr_Error(e)  => { ext_handle_data_check_error(e); RETIRE_FAIL },
+      Ext_DataAddr_OK(vaddr) => {
+        let aligned : bool =
+          match width {
+            BYTE   => true,
+            HALF   => vaddr[0..0] == 0b0,
+            WORD   => vaddr[1..0] == 0b00,
+            DOUBLE => vaddr[2..0] == 0b000
+          };
+        if not(aligned)
+        then { handle_mem_exception(vaddr, E_SAMO_Addr_Align()); RETIRE_FAIL }
+        else {
+          match translateAddr(vaddr, Write(Data)) {  /* Write and ReadWrite are equivalent here:
+                                                      * both result in a SAMO exception */
+            TR_Failure(e, _) => { handle_mem_exception(vaddr, e); RETIRE_FAIL },
+            TR_Address(addr, _) => {
+              let eares : MemoryOpResult(unit) = match (width, sizeof(xlen)) {
+                (BYTE, _)    => mem_write_ea(addr, 1, aq & rl, rl, true),
+                (HALF, _)    => mem_write_ea(addr, 2, aq & rl, rl, true),
+                (WORD, _)    => mem_write_ea(addr, 4, aq & rl, rl, true),
+                (DOUBLE, 64) => mem_write_ea(addr, 8, aq & rl, rl, true),
+                _            => internal_error(__FILE__, __LINE__, "Unexpected Store-release width")
+              };
+              match (eares) {
+                MemException(e) => { handle_mem_exception(vaddr, e); RETIRE_FAIL },
+                MemValue(_) => {
+                  rs2_val = X(rs2);
+                  let res : MemoryOpResult(bool) = match (width, sizeof(xlen)) {
+                    (BYTE, _)    => mem_write_value(addr, 1, rs2_val[7..0], aq & rl, rl, true),
+                    (HALF, _)    => mem_write_value(addr, 2, rs2_val[15..0], aq & rl, rl, true),
+                    (WORD, _)    => mem_write_value(addr, 4, rs2_val[31..0], aq & rl, rl, true),
+                    (DOUBLE, 64) => mem_write_value(addr, 8, rs2_val,        aq & rl, rl, true),
+                    _            => internal_error(__FILE__, __LINE__, "Unexpected Store-release width")
+                  };
+                  match (res) {
+                    MemValue(_)  => { RETIRE_SUCCESS },
+                    MemException(e) => { handle_mem_exception(vaddr, e); RETIRE_FAIL }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    handle_illegal();
+    RETIRE_FAIL
+  }
+}
+
+mapping clause assembly = STORERL(aq, rl, rs2, rs1, size)
+                      <-> "s" ^ size_mnemonic(size)
+                          ^ "." ^ maybe_aq(aq) ^ maybe_rl(rl)
+                          ^ spc() ^ reg_name(rs1)
+                          ^ sep() ^ reg_name(rs2)
+
+
 --
 
 
