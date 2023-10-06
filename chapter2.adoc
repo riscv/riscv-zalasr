@@ -111,7 +111,7 @@ mapping clause assembly = LOADAQ(aq, rl, rs1, size, rd)
                       <-> "l" ^ size_mnemonic(size)
                           ^ "." ^ maybe_aq(aq) ^ maybe_rl(rl)
                           ^ spc() ^ reg_(rd)
-                          ^ sep() ^ reg_name(rs1)
+                          ^ sep() ^ "(" ^ reg_name(rs1) ^ ")"
 
 --
 
@@ -124,15 +124,15 @@ Store size bytes of memory from _rs2_ to the address in _rs1_ atomically and sub
 
 Mnemonic::
 ====
-sb.{rl,aqrl} _rd_, _rs2_, (_rs1_)
+sb.{rl,aqrl} _rs2_, (_rs1_)
 
-sh.{rl,aqrl} _rd_, _rs2_, (_rs1_)
+sh.{rl,aqrl} _rs2_, (_rs1_)
 
-sw.{rl,aqrl} _rd_, _rs2_, (_rs1_)
+sw.{rl,aqrl} _rs2_, (_rs1_)
 
-sd.{rl,aqrl} _rd_, _rs2_, (_rs1_)
+sd.{rl,aqrl} _rs2_, (_rs1_)
 
-sq.{rl,aqrl} _rd_, _rs2_, (_rs1_)
+sq.{rl,aqrl} _rs2_, (_rs1_)
 ====
 
 Encoding::
@@ -140,7 +140,7 @@ Encoding::
 ....
 {reg: [
   {bits: 7,  name: 'opcode',    attr: ['7', 'AMO'], type: 8},
-  {bits: 5,  name: 'rd',        attr: ['5', 'dest'], type: 2},
+  {bits: 5,  name: 'rd',        attr: ['5', '0'], type: 2},
   {bits: 3,  name: 'funct3',    attr: ['3', 'width'], type: 8},
   {bits: 5,  name: 'rs1',       attr: ['5', 'addr'], type: 4},
   {bits: 5,  name: 'rs2',       attr: ['5', 'src'], type: 4},
@@ -239,8 +239,8 @@ function clause execute (STORERL(aq, rl, rs2, rs1, width)) = {
 mapping clause assembly = STORERL(aq, rl, rs2, rs1, size)
                       <-> "s" ^ size_mnemonic(size)
                           ^ "." ^ maybe_aq(aq) ^ maybe_rl(rl)
-                          ^ spc() ^ reg_name(rs1)
-                          ^ sep() ^ reg_name(rs2)
+                          ^ spc() ^ reg_name(rs2)
+                          ^ sep() ^ "(" ^ reg_name(rs1) ^ ")"
 
 
 --
