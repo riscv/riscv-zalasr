@@ -7,14 +7,11 @@ As seen in cite:[hansdoc], these can be important for high performance designs.
 They are also widely used in language-level memory models.
 Both the Java cite:[manson2005java] and {cpp} cite:[boehm2008foundations] memory models make use of acquire-release semantics, and {cpp}'s `atomic` provides primitives that are meant to map directly to load-acquire and store-release instructions.
 
-Other architectures feature similar instructions, with ARMv8 introducing load-acquire and store-release instructions (and ARMv8.3 introducing RCpc load-acquire and store-release).
-These instructions are not generally necessary on x86 because of its stronger memory model.
-
 == Suitability for inclusion in the fast-track process
 
 This extension is suitable for inclusion in the fast-track process because it is small, self-contained, and uncontroversial.
 It adds only two new instructions (although with 8 variants of each of them).
-It addresses a pressing need (being able to efficiently map the {cpp} memory model), and does so in an area where RISC-V is lacking compared to other architectures.
+It addresses a pressing need (being able to efficiently map the {cpp} memory model) that has already been considered (notes are already made in the memory model for its addition).
 Mailing list discussion has been primarily over details, with the core aspects being uncontroversial.
 This proposal is complete, even coming with SAIL code.
 Therefore, this extension should be included in the fast-track process.
