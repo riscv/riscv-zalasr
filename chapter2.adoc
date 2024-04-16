@@ -2,11 +2,11 @@
 == Instructions
 
 <<<
-[#insns-ldatomic,reftext="Load Atomic Ordered"]
-=== Load Atomic Ordered
+[#insns-ldatomic,reftext="Load Acquire"]
+=== Load Acquire
 
 Synopsis::
-Loads size bytes of memory from the address in _rs1_ atomically and subject to the ordering requirements.
+The load-acquire instruction, atomically and subject to the ordering annotations specified in the instruction, loads a size-byte value from the address in _rs1_ into the register _rd_.
 
 Mnemonic::
 ====
@@ -39,7 +39,7 @@ Description::
 
 This instruction loads size bytes of memory from rs1 atomically.
 If the size is less than XLEN, it is sign-extended to fill the destination register.
-This load may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
+This load must have the ordering annotation _aq_, and may have ordering annotation _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 The address held in _rs1_ should be naturally aligned to the size of the operand.
 If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
@@ -51,9 +51,11 @@ funct5 for this instruction is 00110.
 
 [NOTE]
 ====
-Load-release is not seen as useful at this time, due to its lack of support in language-level memory models.
-Load-atomic is similarly not seen as useful enough.
-Instead, users should suitably align their pointers so that ordinary load instructions suffice.
+The _aq_ bit is mandatory because the two encodings that would be produced are not seen as useful at this time.
+The version with neither the _aq_ nor the _rl_ bit set would correspond to a load with no ordering annotations that was guaranteed to be performed atomically.
+This can be achieved with ordinary load instuctions by suitably aligning pointers.
+The version with only the _rl_ bit would correspond to load-release.
+Load-release has theoretical applications in seqlocks, but is not supported in language-level memory models and so is not included.
 ====
 
 SAIL code::
@@ -116,11 +118,11 @@ mapping clause assembly = LOADAQ(aq, rl, rs1, size, rd)
 --
 
 <<<
-[#insns-sdatomic,reftext="Store Atomic Ordered"]
-=== Store Atomic Ordered
+[#insns-sdatomic,reftext="Store Release"]
+=== Store Release
 
 Synopsis::
-Store size bytes of memory from _rs2_ to the address in _rs1_ atomically and subject to the ordering requirements.
+The store-release instruction, atomically and subject to the ordering annotations specified in the instruction, stores the size-byte value from the register _rs2_ to the address in _rs1_.
 
 Mnemonic::
 ====
@@ -153,7 +155,7 @@ Encoding::
 Description::
 
 This instruction stores size bytes of memory from rs1 atomically.
-This store may have ordering annotations _aq_ and _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
+This store must have ordering annotation _rl_, and may have ordering annotation _aq_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 The address held in _rs1_ should be naturally aligned to the size of the operand.
 If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
@@ -166,9 +168,11 @@ funct5 for this instruction is 00111.
 
 [NOTE]
 ====
-Store-acquire is not seen as useful at this time, due to its lack of support in language-level memory models.
-Store-atomic is similarly not seen as useful enough.
-Instead, users should suitably align their pointers so that ordinary store instructions suffice.
+The _rl_ bit is mandatory because the two encodings that would be produced are not seen as useful at this time.
+The version with neither the _aq_ nor the _rl_ bit set would correspond to a store with no ordering annotations that was guaranteed to be performed atomically.
+This can be achieved with ordinary store instuctions by suitably aligned pointers.
+The version with only the _aq_ bit would correspond to store-acquire.
+Store-acquire has theoretical applications in seqlocks, but is not supported in language-level memory models and so is not included.
 ====
 
 SAIL code::
