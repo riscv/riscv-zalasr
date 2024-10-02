@@ -43,7 +43,7 @@ This load must have the ordering annotation _aq_, and may have ordering annotati
 The address held in _rs1_ should be naturally aligned to the size of the operand.
 If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
-If the Zam standard extension is implemented, the address is not required to be aligned and the weaker atomicity guarantee provided by Zam applies.
+The misaligned atomicity granule PMA applies to the instructions in this extension.
 The versions without the _aq_ bit set are RESERVED.
 RV32 shall not implement the d and q variants and RV64 shall not implement the q variant.
 
