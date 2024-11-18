@@ -5,6 +5,8 @@ The instructions in the Zalasr extension require that the address held in _rs1_ 
 If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
 
+<<<
+
 The misaligned atomicity granule PMA, defined in Volume II of this manual, optionally relaxes this alignment requirement.
 If all accessed bytes lie within the same misaligned atomicity granule, the instruction will not raise an exception for reasons of address alignment, and the instruction will give rise to only one memory operation for the purposes of RVWMO—i.e., it will execute atomically.
 
