@@ -36,10 +36,10 @@ Encoding::
 Description::
 
 This instruction loads 2^width^ bytes of memory from rs1 atomically.
-If the size is less than XLEN, it is sign-extended to fill the destination register.
+If the size (2^width+3^) is less than XLEN, it is sign-extended to fill the destination register.
 This load must have the ordering annotation _aq_, and may have ordering annotation _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 
-The Zalasr extension requires that the address held in _rs1_ be naturally aligned to the size of the operand.
+The Zalasr extension requires that the address held in _rs1_ be naturally aligned to the size in bytes (2^width) of the operand.
 If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
 
@@ -105,7 +105,7 @@ Description::
 This instruction stores 2^width^ bytes of memory from rs1 atomically.
 This store must have ordering annotation _rl_, and may have ordering annotation _aq_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
 
-The Zalasr extension requires that the address held in _rs1_ be naturally aligned to the size of the operand.
+The Zalasr extension requires that the address held in _rs1_ be naturally aligned to the size in bytes (2^width^) of the operand.
 If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
 The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
 
