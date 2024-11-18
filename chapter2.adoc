@@ -1,7 +1,14 @@
 [[chapter2]]
 == Instructions
 
-<<<
+The instructions in the Zalasr extension require that the address held in _rs1_ be naturally aligned to the size in bytes (2^width^) of the operand.
+If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
+The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
+
+The misaligned atomicity granule PMA applies to instructions in the Zalasr extension.
+If all accessed bytes lie within the same misaligned atomicity granule, the instruction will not raise an exception for reasons of address alignment, and the instruction will give rise to only one memory operation for the purposes of RVWMO—i.e., it will execute atomically.
+
+
 [#insns-ldatomic,reftext="Load Acquire"]
 === Load Acquire
 
@@ -38,18 +45,9 @@ Description::
 This instruction loads 2^width^ bytes of memory from rs1 atomically.
 If the size (2^width+3^) is less than XLEN, it is sign-extended to fill the destination register.
 This load must have the ordering annotation _aq_, and may have ordering annotation _rl_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
-
-The Zalasr extension requires that the address held in _rs1_ be naturally aligned to the size in bytes (2^width) of the operand.
-If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
-The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
-
-The misaligned atomicity granule PMA, defined in Volume II of this manual, optionally relaxes this alignment requirement.
-If present, the misaligned atomicity granule PMA specifies the size of a misaligned atomicity granule, a power-of-two number of bytes.
-The misaligned atomicity granule PMA applies to instructions in the Zalasr extension in addition to AMOs, loads and stores defined in the base ISAs, and loads and stores of no more than XLEN bits defined in the F, D, and Q extensions.
-For an instruction in that set, if all accessed bytes lie within the same misaligned atomicity granule, the instruction will not raise an exception for reasons of address alignment, and the instruction will give rise to only one memory operation for the purposes of RVWMO—i.e., it will execute atomically.
-
++
 The versions without the _aq_ bit set are RESERVED.
-ld.{aq, aqrl} is RV64-only.
+LD.{AQ, AQRL} is RV64-only.
 
 
 [NOTE]
@@ -61,13 +59,6 @@ The version with only the _rl_ bit would correspond to load-release.
 Load-release has theoretical applications in seqlocks, but is not supported in language-level memory models and so is not included.
 ====
 
-SAIL code::
-[source,sail]
---
-Not included in this specification.
---
-
-<<<
 [#insns-sdatomic,reftext="Store Release"]
 === Store Release
 
@@ -104,18 +95,9 @@ Description::
 
 This instruction stores 2^width^ bytes of memory from rs1 atomically.
 This store must have ordering annotation _rl_, and may have ordering annotation _aq_ encoded in the instruction: if the bit _aq_ is set, the instruction has an "acquire-RCsc" annotation, and if the bit _rl_ is set, the instruction has a "release-RCsc" annotation.
-
-The Zalasr extension requires that the address held in _rs1_ be naturally aligned to the size in bytes (2^width^) of the operand.
-If the address is not naturally aligned, an address-misaligned exception or an access-fault exception will be generated.
-The access-fault exception can be generated for a memory access that would otherwise be able to complete except for the misalignment, if the misaligned access should not be emulated.
-
-The misaligned atomicity granule PMA, defined in Volume II of this manual, optionally relaxes this alignment requirement.
-If present, the misaligned atomicity granule PMA specifies the size of a misaligned atomicity granule, a power-of-two number of bytes.
-The misaligned atomicity granule PMA applies to instructions in the Zalasr extension in addition to AMOs, loads and stores defined in the base ISAs, and loads and stores of no more than XLEN bits defined in the F, D, and Q extensions.
-For an instruction in that set, if all accessed bytes lie within the same misaligned atomicity granule, the instruction will not raise an exception for reasons of address alignment, and the instruction will give rise to only one memory operation for the purposes of RVWMO—i.e., it will execute atomically.
-
++
 The versions without the _rl_ bit set are RESERVED.
-sd.{rl, aqrl} is RV64-only.
+SD.{RL, AQRL} is RV64-only.
 
 
 [NOTE]
@@ -127,8 +109,4 @@ The version with only the _aq_ bit would correspond to store-acquire.
 Store-acquire has theoretical applications in seqlocks, but is not supported in language-level memory models and so is not included.
 ====
 
-SAIL code::
-[source,sail]
---
-Not included in this specification.
---
+<<<
