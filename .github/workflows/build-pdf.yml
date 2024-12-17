@@ -24,9 +24,11 @@ on:
         type: boolean
         default: false
   pull_request:
+    branches:
+      - '*'
   push:
     branches:
-      - main
+      - '*'
 
 jobs:
   build:
