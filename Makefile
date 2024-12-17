@@ -14,6 +14,8 @@
 
 HEADER_SOURCE := header.adoc
 PDF_RESULT := riscv-zalasr-0p1.pdf
+DOCKER_RUN := docker run --rm -v ${PWD}:/build -w /build \
+riscvintl/riscv-docs-base-container-image:latest
 
 ASCIIDOCTOR_PDF := asciidoctor-pdf
 OPTIONS := --trace -a compress \
