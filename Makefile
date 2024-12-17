@@ -21,7 +21,6 @@ OPTIONS := --trace -a compress \
            -a revnumber=${VERSION} \
            -a revremark=${REVMARK} \
            -a revdate=${DATE} \
-           -a pdf-fontsdir=../docs-resources/fonts \
            -a pdf-theme=../docs-resources/themes/riscv-pdf.yml \
            --failure-level=ERROR
 REQUIRES := --require=asciidoctor-bibtex \
