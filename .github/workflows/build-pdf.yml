@@ -30,7 +30,7 @@ jobs:
     steps:
     # Checkout the repository
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # Pull the latest RISC-V Docs container image
     # https://github.com/riscv/riscv-docs-base-container-image
@@ -63,7 +63,7 @@ jobs:
         done
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: ${{ env.ARTIFACT_PATH }}
