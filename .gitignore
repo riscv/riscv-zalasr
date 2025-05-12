@@ -1,3 +1,5 @@
 *.pdf
 images/diag-wavedrom*
 .asciidoctor
+/build/*
+/images/*
