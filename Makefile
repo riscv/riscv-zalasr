@@ -14,9 +14,9 @@
 
 HEADER_SOURCE := header.adoc
 PDF_RESULT := riscv-zalasr-0p1.pdf
-VERSION ?= 0.8.1
-REVMARK ?= "Stable"
-DATE ?= "2025-05-12"
+VERSION ?= 0.9
+REVMARK ?= "Frozen"
+DATE ?= "2025-07-12"
 DOCKER_RUN := docker run --rm -v ${PWD}:/build -w /build \
 riscvintl/riscv-docs-base-container-image:latest
 
